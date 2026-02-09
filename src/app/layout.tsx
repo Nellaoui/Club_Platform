@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   description: "A technology club platform for sharing resources and collaborating",
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function RootLayout({
   children,
 }: {
