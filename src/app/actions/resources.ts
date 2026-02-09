@@ -10,7 +10,8 @@ export async function createResourceAction(
   type: 'pdf' | 'image' | 'link',
   fileUrl?: string,
   externalUrl?: string,
-  description?: string
+  description?: string,
+  allowedGrade?: number | null
 ) {
   const supabase = await createServerSupabaseClient()
   const {
@@ -38,6 +39,7 @@ export async function createResourceAction(
     type,
     file_url: fileUrl,
     external_url: externalUrl,
+    allowed_grade: allowedGrade ?? null,
     created_by: user.id,
   })
 
@@ -50,6 +52,8 @@ export async function createResourceFromForm(formData: FormData): Promise<void> 
   const title = String(formData.get('title') || '').trim()
   const type = String(formData.get('type') || 'link') as 'pdf' | 'image' | 'link'
   const description = String(formData.get('description') || '').trim()
+  const allowedGradeRaw = String(formData.get('allowedGrade') || '')
+  const allowedGrade = allowedGradeRaw ? Number(allowedGradeRaw) : null
   const fileUrlInput = String(formData.get('fileUrl') || '').trim()
   const externalUrl = String(formData.get('externalUrl') || '').trim()
   const file = formData.get('file') as File | null
@@ -125,6 +129,7 @@ export async function createResourceFromForm(formData: FormData): Promise<void> 
     type,
     file_url: type === 'link' ? undefined : uploadedFileUrl,
     external_url: type === 'link' ? externalUrl : undefined,
+    allowed_grade: Number.isFinite(allowedGrade) ? allowedGrade : null,
     created_by: user.id,
   })
 

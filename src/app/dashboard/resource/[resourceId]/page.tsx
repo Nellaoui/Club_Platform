@@ -31,6 +31,10 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
     notFound()
   }
 
+  if (user.role !== 'admin' && resource.allowed_grade && user.grade !== resource.allowed_grade) {
+    redirect('/dashboard')
+  }
+
   // Get comments
   const { data: comments } = await supabase
     .from('comments')
@@ -114,11 +118,19 @@ export default async function ResourcePage({ params }: ResourcePageProps) {
               <div>
                 <a
                   href={resource.file_url}
-                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="inline-block bg-emerald-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-emerald-700"
                 >
-                  Download PDF
+                  View PDF →
                 </a>
+                <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                  <iframe
+                    src={resource.file_url}
+                    title={resource.title}
+                    className="w-full h-[70vh]"
+                  />
+                </div>
               </div>
             )}
             {resource.type === 'image' && resource.file_url && (

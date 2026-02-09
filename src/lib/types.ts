@@ -42,6 +42,7 @@ export interface Resource {
   type: 'pdf' | 'image' | 'link'
   file_url: string | null
   external_url: string | null
+  allowed_grade?: number | null
   created_by: string
   created_at: string
   updated_at: string

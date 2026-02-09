@@ -46,11 +46,21 @@ export default async function SubjectPage({ params, searchParams }: SubjectPageP
 
   if (weeks) {
     for (const week of weeks) {
-      const { data: resources } = await supabase
+      let resourcesQuery = supabase
         .from('resources')
         .select('*')
         .eq('week_id', week.id)
         .order('created_at', { ascending: false })
+
+      if (user.role !== 'admin') {
+        if (typeof user.grade === 'number') {
+          resourcesQuery = resourcesQuery.or(`allowed_grade.is.null,allowed_grade.eq.${user.grade}`)
+        } else {
+          resourcesQuery = resourcesQuery.is('allowed_grade', null)
+        }
+      }
+
+      const { data: resources } = await resourcesQuery
       weekResources[week.id] = resources || []
     }
   }

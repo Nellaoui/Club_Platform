@@ -23,7 +23,7 @@ export default async function AdminResourcesPage() {
     <div className="p-4 sm:p-6">
       <div className="max-w-6xl">
         <div className="mb-8">
-          <Link href="/dashboard/admin" className="text-emerald-600 text-sm hover:text-emerald-700 mb-2 inline-block">
+          <Link href="/dashboard/admin" className="text-emerald-700 text-sm font-medium underline decoration-emerald-300 hover:text-emerald-800 mb-2 inline-block">
             ← Back to Admin
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Manage Resources</h1>
@@ -62,6 +62,15 @@ export default async function AdminResourcesPage() {
               </select>
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Allowed Grade</label>
+              <select name="allowedGrade" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                <option value="">All Grades</option>
+                {Array.from({ length: 8 }, (_, i) => i + 1).map((g) => (
+                  <option key={g} value={g}>Grade {g}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">File (PDF/Image)</label>
               <input name="file" type="file" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
             </div>
@@ -96,6 +105,7 @@ export default async function AdminResourcesPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Resource</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Week</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Grade</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Created</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-700 uppercase">Actions</th>
                 </tr>
@@ -111,6 +121,9 @@ export default async function AdminResourcesPage() {
                           {week ? `${subjectMap.get(week.subject_id) || 'Subject'} — Week ${week.week_number}` : '—'}
                         </td>
                         <td className="px-6 py-3 text-sm text-gray-600">{resource.type}</td>
+                        <td className="px-6 py-3 text-sm text-gray-600">
+                          {resource.allowed_grade ? `Grade ${resource.allowed_grade}` : 'All'}
+                        </td>
                         <td className="px-6 py-3 text-sm text-gray-500">
                           {new Date(resource.created_at).toLocaleDateString()}
                         </td>
@@ -131,7 +144,7 @@ export default async function AdminResourcesPage() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
                       No resources yet
                     </td>
                   </tr>

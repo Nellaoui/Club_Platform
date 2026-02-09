@@ -21,7 +21,7 @@ export default async function AdminInventoryPage() {
     <div className="p-4 sm:p-6">
       <div className="max-w-6xl">
         <div className="mb-8">
-          <Link href="/dashboard/admin" className="text-emerald-600 text-sm hover:text-emerald-700 mb-2 inline-block">
+          <Link href="/dashboard/admin" className="text-emerald-700 text-sm font-medium underline decoration-emerald-300 hover:text-emerald-800 mb-2 inline-block">
             ← Back to Admin
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">Inventory</h1>

@@ -2,7 +2,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { updateUserRole } from '@/app/actions/auth'
+import { updateUserGrade, updateUserRole } from '@/app/actions/auth'
 
 export default async function AdminUsersPage() {
   const user = await getCurrentUser()
@@ -33,7 +33,7 @@ export default async function AdminUsersPage() {
     <div className="p-4 sm:p-6">
       <div className="max-w-6xl">
         <div className="mb-8">
-          <Link href="/dashboard/admin" className="text-emerald-600 text-sm hover:text-emerald-700 mb-2 inline-block">
+          <Link href="/dashboard/admin" className="text-emerald-700 text-sm font-medium underline decoration-emerald-300 hover:text-emerald-800 mb-2 inline-block">
             ← Back to Admin
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
@@ -55,6 +55,7 @@ export default async function AdminUsersPage() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Grade</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Joined</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                       </tr>
@@ -69,6 +70,30 @@ export default async function AdminUsersPage() {
                               <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-red-100 text-red-700">
                                 admin
                               </span>
+                            </td>
+                            <td className="px-6 py-3 text-sm">
+                              <form
+                                action={async (formData) => {
+                                  'use server'
+                                  const gradeValue = String(formData.get('grade') || '')
+                                  const grade = gradeValue ? Number(gradeValue) : null
+                                  await updateUserGrade(u.id, Number.isFinite(grade) ? grade : null)
+                                }}
+                              >
+                                <select
+                                  name="grade"
+                                  defaultValue={typeof u.grade === 'number' ? String(u.grade) : ''}
+                                  className="border border-gray-300 rounded-md px-2 py-1 text-xs"
+                                >
+                                  <option value="">Unassigned</option>
+                                  {Array.from({ length: 8 }, (_, i) => i + 1).map((g) => (
+                                    <option key={g} value={g}>{g}</option>
+                                  ))}
+                                </select>
+                                <button type="submit" className="ml-2 text-emerald-600 hover:text-emerald-700 text-xs font-medium">
+                                  Save
+                                </button>
+                              </form>
                             </td>
                             <td className="px-6 py-3 text-sm text-gray-500">
                               {new Date(u.created_at).toLocaleDateString()}
@@ -91,7 +116,7 @@ export default async function AdminUsersPage() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={5} className="px-6 py-6 text-center text-gray-500">
+                          <td colSpan={6} className="px-6 py-6 text-center text-gray-500">
                             No admins found
                           </td>
                         </tr>
@@ -116,6 +141,7 @@ export default async function AdminUsersPage() {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Grade</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Joined</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                           </tr>
@@ -129,6 +155,30 @@ export default async function AdminUsersPage() {
                                 <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
                                   student
                                 </span>
+                              </td>
+                              <td className="px-6 py-3 text-sm">
+                                <form
+                                  action={async (formData) => {
+                                    'use server'
+                                    const gradeValue = String(formData.get('grade') || '')
+                                    const grade = gradeValue ? Number(gradeValue) : null
+                                    await updateUserGrade(u.id, Number.isFinite(grade) ? grade : null)
+                                  }}
+                                >
+                                  <select
+                                    name="grade"
+                                    defaultValue={typeof u.grade === 'number' ? String(u.grade) : ''}
+                                    className="border border-gray-300 rounded-md px-2 py-1 text-xs"
+                                  >
+                                    <option value="">Unassigned</option>
+                                    {Array.from({ length: 8 }, (_, i) => i + 1).map((g) => (
+                                      <option key={g} value={g}>{g}</option>
+                                    ))}
+                                  </select>
+                                  <button type="submit" className="ml-2 text-emerald-600 hover:text-emerald-700 text-xs font-medium">
+                                    Save
+                                  </button>
+                                </form>
                               </td>
                               <td className="px-6 py-3 text-sm text-gray-500">
                                 {new Date(u.created_at).toLocaleDateString()}
@@ -172,6 +222,7 @@ export default async function AdminUsersPage() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Name</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Email</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Grade</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Joined</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                         </tr>
@@ -185,6 +236,30 @@ export default async function AdminUsersPage() {
                               <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
                                 student
                               </span>
+                            </td>
+                            <td className="px-6 py-3 text-sm">
+                              <form
+                                action={async (formData) => {
+                                  'use server'
+                                  const gradeValue = String(formData.get('grade') || '')
+                                  const grade = gradeValue ? Number(gradeValue) : null
+                                  await updateUserGrade(u.id, Number.isFinite(grade) ? grade : null)
+                                }}
+                              >
+                                <select
+                                  name="grade"
+                                  defaultValue={typeof u.grade === 'number' ? String(u.grade) : ''}
+                                  className="border border-gray-300 rounded-md px-2 py-1 text-xs"
+                                >
+                                  <option value="">Unassigned</option>
+                                  {Array.from({ length: 8 }, (_, i) => i + 1).map((g) => (
+                                    <option key={g} value={g}>{g}</option>
+                                  ))}
+                                </select>
+                                <button type="submit" className="ml-2 text-emerald-600 hover:text-emerald-700 text-xs font-medium">
+                                  Save
+                                </button>
+                              </form>
                             </td>
                             <td className="px-6 py-3 text-sm text-gray-500">
                               {new Date(u.created_at).toLocaleDateString()}
