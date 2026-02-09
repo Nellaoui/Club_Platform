@@ -45,7 +45,7 @@ export async function createResourceAction(
   return data
 }
 
-export async function createResourceFromForm(formData: FormData) {
+export async function createResourceFromForm(formData: FormData): Promise<void> {
   const weekId = String(formData.get('weekId') || '')
   const title = String(formData.get('title') || '').trim()
   const type = String(formData.get('type') || 'link') as 'pdf' | 'image' | 'link'
@@ -118,7 +118,7 @@ export async function createResourceFromForm(formData: FormData) {
     throw new Error('External URL is required for link resources')
   }
 
-  const { data, error } = await supabase.from('resources').insert({
+  const { error } = await supabase.from('resources').insert({
     week_id: weekId,
     title,
     description: description || undefined,
@@ -129,7 +129,6 @@ export async function createResourceFromForm(formData: FormData) {
   })
 
   if (error) throw error
-  return data
 }
 
 export async function deleteResourceAction(id: string) {
