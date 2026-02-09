@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 
 export async function signOut() {
   const supabase = await createServerSupabaseClient()
@@ -44,6 +45,9 @@ export async function updateUserRole(userId: string, role: 'admin' | 'student') 
   if (error) {
     throw new Error(error.message)
   }
+
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/admin/users')
 }
 
 export async function updateUserGrade(userId: string, grade: number | null) {
@@ -79,4 +83,7 @@ export async function updateUserGrade(userId: string, grade: number | null) {
   if (error) {
     throw new Error(error.message)
   }
+
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/admin/users')
 }

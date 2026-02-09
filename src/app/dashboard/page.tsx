@@ -21,8 +21,21 @@ export default async function DashboardPage() {
     <div className="p-4 sm:p-6">
       <div className="max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Welcome, {user.full_name || 'Student'}!</h1>
-          <p className="text-gray-600 mt-1">Browse and engage with club resources</p>
+          <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-sm text-emerald-700 font-semibold">Dashboard</p>
+                <h1 className="text-3xl font-bold text-gray-900 mt-1">
+                  Welcome, {user.full_name || 'Student'}!
+                </h1>
+                <p className="text-gray-600 mt-1">Browse and engage with club resources</p>
+              </div>
+              <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-800 px-3 py-2 rounded-full text-sm font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                {typeof user.grade === 'number' ? `Grade ${user.grade}` : 'Grade not set'}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
