@@ -2,7 +2,8 @@ import { getCurrentUser } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { createResourceFromForm, deleteResourceAction } from '@/app/actions/resources'
+import { deleteResourceAction } from '@/app/actions/resources'
+import ResourceForm from './ResourceForm'
 
 export default async function AdminResourcesPage() {
   const user = await getCurrentUser()
@@ -19,6 +20,8 @@ export default async function AdminResourcesPage() {
   const subjectMap = new Map(subjects?.map((s) => [s.id, s.name]) || [])
   const weekMap = new Map(weeks?.map((w) => [w.id, w]) || [])
 
+  const subjectMapObject = Object.fromEntries(subjectMap)
+
   return (
     <div className="p-4 sm:p-6">
       <div className="max-w-6xl">
@@ -32,69 +35,10 @@ export default async function AdminResourcesPage() {
 
         <div className="bg-white rounded-lg border border-gray-200 p-6 mb-8">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Create Resource</h2>
-          <form action={createResourceFromForm} encType="multipart/form-data" className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Week</label>
-              <select name="weekId" required className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">Select week</option>
-                {weeks?.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {subjectMap.get(w.subject_id) || 'Subject'} — Week {w.week_number}: {w.title}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-              <input
-                name="title"
-                required
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                placeholder="Lesson PDF"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-              <select name="type" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="pdf">PDF</option>
-                <option value="image">Image</option>
-                <option value="link">Link</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Allowed Grade</label>
-              <select name="allowedGrade" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                <option value="">All Grades</option>
-                {Array.from({ length: 8 }, (_, i) => i + 1).map((g) => (
-                  <option key={g} value={g}>Grade {g}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">File (PDF/Image)</label>
-              <input name="file" type="file" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <input name="description" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="Optional" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">File URL</label>
-              <input name="fileUrl" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="https://..." />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">External URL</label>
-              <input name="externalUrl" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm" placeholder="https://..." />
-            </div>
-            <div className="sm:col-span-2">
-              <button
-                type="submit"
-                className="inline-flex items-center px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
-              >
-                Create Resource
-              </button>
-            </div>
-          </form>
+          <ResourceForm
+            weeks={weeks || []}
+            subjectMap={subjectMapObject}
+          />
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">

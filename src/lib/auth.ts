@@ -6,7 +6,13 @@ export async function getCurrentUser() {
 
     const { data: authData, error: authError } = await supabase.auth.getUser()
     if (authError) {
-      console.error('Error getting auth user:', authError)
+      const isMissingSession =
+        (authError as { name?: string }).name === 'AuthSessionMissingError' ||
+        (authError as { code?: string }).code === 'auth_session_missing'
+
+      if (!isMissingSession) {
+        console.error('Error getting auth user:', authError)
+      }
       return null
     }
 
@@ -26,7 +32,10 @@ export async function getCurrentUser() {
 
     return profile
   } catch (err) {
-    console.error('getCurrentUser unexpected error:', err)
+    const name = (err as { name?: string }).name
+    if (name !== 'AuthSessionMissingError') {
+      console.error('getCurrentUser unexpected error:', err)
+    }
     return null
   }
 }
