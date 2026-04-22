@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       // Check if user profile exists (use maybeSingle to avoid errors when 0 rows)
       const { data: existingUser } = await admin
         .from('users')
-        .select('id, grade')
+        .select('id, grade, approved')
         .eq('id', data.user.id)
         .maybeSingle()
 
@@ -45,14 +45,18 @@ export async function GET(request: NextRequest) {
           full_name: data.user.user_metadata?.full_name || null,
           avatar_url: data.user.user_metadata?.avatar_url || null,
           role: 'student',
+          approved: false,
         })
 
         if (insertError) {
           console.error('Error creating user profile:', insertError)
         } else {
-          // New user without grade -> send to onboarding
-          return redirect('/onboarding')
+          return redirect('/pending-approval')
         }
+      }
+
+      if (existingUser?.approved === false) {
+        return redirect('/pending-approval')
       }
 
       // If profile exists but grade is missing, send to onboarding

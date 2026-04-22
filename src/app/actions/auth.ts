@@ -87,3 +87,42 @@ export async function updateUserGrade(userId: string, grade: number | null) {
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/admin/users')
 }
+
+export async function updateUserApproval(userId: string, approved: boolean) {
+  const supabase = await createServerSupabaseClient()
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser()
+
+  if (!currentUser) {
+    throw new Error('Unauthorized')
+  }
+
+  const { data: adminUser } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', currentUser.id)
+    .single()
+
+  if (adminUser?.role !== 'admin') {
+    throw new Error('Only admins can approve users')
+  }
+
+  const admin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { error } = await admin
+    .from('users')
+    .update({ approved })
+    .eq('id', userId)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/admin')
+  revalidatePath('/dashboard/admin/users')
+}

@@ -133,6 +133,25 @@ SET grade = 1
 WHERE email = 'student1@example.com';
 ```
 
+If you want new Google sign-ins to stay blocked until admin approval, run this migration in Supabase SQL Editor:
+
+```sql
+ALTER TABLE users
+ADD COLUMN IF NOT EXISTS approved boolean;
+
+UPDATE users
+SET approved = true
+WHERE approved IS NULL;
+
+ALTER TABLE users
+ALTER COLUMN approved SET DEFAULT false;
+
+ALTER TABLE users
+ALTER COLUMN approved SET NOT NULL;
+```
+
+Or run the script in [scripts/add_user_approval.sql](scripts/add_user_approval.sql).
+
 ---
 
 ## 🎯 Testing the Platform

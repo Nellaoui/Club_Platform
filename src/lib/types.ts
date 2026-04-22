@@ -7,6 +7,7 @@ export interface User {
   full_name: string | null
   avatar_url: string | null
   grade?: number | null
+  approved?: boolean | null
   role: Role
   created_at: string
   updated_at: string
@@ -69,4 +70,15 @@ export interface Attendance {
   created_at: string
   updated_at: string
   user?: User
+}
+
+export interface ActivityImage {
+  id: string
+  title: string
+  description: string | null
+  image_url: string
+  event_date: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
 }

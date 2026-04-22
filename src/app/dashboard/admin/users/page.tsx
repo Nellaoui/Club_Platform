@@ -2,7 +2,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { updateUserGrade, updateUserRole } from '@/app/actions/auth'
+import { updateUserApproval, updateUserGrade, updateUserRole } from '@/app/actions/auth'
 
 export default async function AdminUsersPage() {
   const user = await getCurrentUser()
@@ -57,6 +57,7 @@ export default async function AdminUsersPage() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Grade</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Joined</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Approval</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                       </tr>
                     </thead>
@@ -98,6 +99,11 @@ export default async function AdminUsersPage() {
                             <td className="px-6 py-3 text-sm text-gray-500">
                               {new Date(u.created_at).toLocaleDateString()}
                             </td>
+                            <td className="px-6 py-3">
+                              <span className="inline-block px-2 py-1 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
+                                approved
+                              </span>
+                            </td>
                             <td className="px-6 py-3 text-sm">
                               {u.id !== user.id && (
                                 <form
@@ -116,7 +122,7 @@ export default async function AdminUsersPage() {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={6} className="px-6 py-6 text-center text-gray-500">
+                          <td colSpan={7} className="px-6 py-6 text-center text-gray-500">
                             No admins found
                           </td>
                         </tr>
@@ -143,6 +149,7 @@ export default async function AdminUsersPage() {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Grade</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Joined</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Approval</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                           </tr>
                         </thead>
@@ -182,6 +189,29 @@ export default async function AdminUsersPage() {
                               </td>
                               <td className="px-6 py-3 text-sm text-gray-500">
                                 {new Date(u.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="px-6 py-3 text-sm">
+                                <div className="flex items-center gap-2">
+                                  <span
+                                    className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                                      u.approved === false
+                                        ? 'bg-amber-100 text-amber-700'
+                                        : 'bg-emerald-100 text-emerald-700'
+                                    }`}
+                                  >
+                                    {u.approved === false ? 'pending' : 'approved'}
+                                  </span>
+                                  <form
+                                    action={async () => {
+                                      'use server'
+                                      await updateUserApproval(u.id, u.approved === false)
+                                    }}
+                                  >
+                                    <button type="submit" className="text-xs text-emerald-700 hover:text-emerald-800 font-medium">
+                                      {u.approved === false ? 'Approve' : 'Block'}
+                                    </button>
+                                  </form>
+                                </div>
                               </td>
                               <td className="px-6 py-3 text-sm">
                                 {u.id !== user.id && (
@@ -224,6 +254,7 @@ export default async function AdminUsersPage() {
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Role</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Grade</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Joined</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Approval</th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase">Actions</th>
                         </tr>
                       </thead>
@@ -263,6 +294,29 @@ export default async function AdminUsersPage() {
                             </td>
                             <td className="px-6 py-3 text-sm text-gray-500">
                               {new Date(u.created_at).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-3 text-sm">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                                    u.approved === false
+                                      ? 'bg-amber-100 text-amber-700'
+                                      : 'bg-emerald-100 text-emerald-700'
+                                  }`}
+                                >
+                                  {u.approved === false ? 'pending' : 'approved'}
+                                </span>
+                                <form
+                                  action={async () => {
+                                    'use server'
+                                    await updateUserApproval(u.id, u.approved === false)
+                                  }}
+                                >
+                                  <button type="submit" className="text-xs text-emerald-700 hover:text-emerald-800 font-medium">
+                                    {u.approved === false ? 'Approve' : 'Block'}
+                                  </button>
+                                </form>
+                              </div>
                             </td>
                             <td className="px-6 py-3 text-sm">
                               {u.id !== user.id && (

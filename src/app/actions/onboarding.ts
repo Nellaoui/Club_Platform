@@ -40,6 +40,15 @@ export async function setUserGrade(formData: FormData) {
     return redirect(`/onboarding?error=save_failed&msg=${msg}`)
   }
 
-  // After successful save, redirect to dashboard
+  const { data: profile } = await admin
+    .from('users')
+    .select('approved')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profile?.approved === false) {
+    return redirect('/pending-approval')
+  }
+
   return redirect('/dashboard')
 }
