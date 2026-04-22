@@ -1,21 +1,25 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
 import Image from 'next/image'
+import { useRef, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const supabaseRef = useRef(createClient())
+  const isAuthStartingRef = useRef(false)
 
   const handleGoogleLogin = async () => {
+    if (isAuthStartingRef.current) {
+      return
+    }
+
+    isAuthStartingRef.current = true
     setIsLoading(true)
-    const supabase = createClient()
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
 
-    const { error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabaseRef.current.auth.signInWithOAuth({
       provider: 'google',
       options: {
         redirectTo: `${siteUrl}/auth/callback`,
@@ -28,6 +32,7 @@ export default function LoginPage() {
 
     if (error) {
       console.error('Login error:', error)
+      isAuthStartingRef.current = false
       setIsLoading(false)
     }
   }
