@@ -8,6 +8,7 @@
   --accent: #0f766e;
   --accent-soft: #dff6ed;
   --ink-muted: #4b6357;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -17,20 +18,10 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #08120f;
-    --foreground: #e9f5ef;
-    --surface: rgba(9, 25, 19, 0.78);
-    --surface-border: rgba(94, 234, 212, 0.18);
-    --ink-muted: #b8d7c7;
-  }
-}
-
 body {
   background:
-    radial-gradient(1200px 500px at 95% -20%, rgba(15, 118, 110, 0.2), transparent 60%),
-    radial-gradient(900px 420px at -10% 100%, rgba(16, 185, 129, 0.16), transparent 62%),
+    radial-gradient(1200px 500px at 95% -20%, rgba(15, 118, 110, 0.14), transparent 60%),
+    radial-gradient(900px 420px at -10% 100%, rgba(16, 185, 129, 0.1), transparent 62%),
     var(--background);
   color: var(--foreground);
   font-family: var(--font-body), "Segoe UI", sans-serif;
