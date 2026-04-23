@@ -14,7 +14,7 @@ export default async function DashboardLayout({
     redirect('/login')
   }
 
-  if (user.approved === false) {
+  if (user.role === 'student' && user.approved !== true) {
     redirect('/pending-approval')
   }
 
@@ -45,6 +45,18 @@ export default async function DashboardLayout({
               className="nav-pill block px-3 py-2 text-sm text-emerald-950"
             >
               Activity Gallery
+            </Link>
+            <Link
+              href="/dashboard/profile"
+              className="nav-pill block px-3 py-2 text-sm text-emerald-950"
+            >
+              My Profile
+            </Link>
+            <Link
+              href="/dashboard/students"
+              className="nav-pill block px-3 py-2 text-sm text-emerald-950"
+            >
+              Students Progress
             </Link>
 
             <p className="text-xs uppercase tracking-wide text-emerald-800/75 px-3 pt-4">Subjects</p>

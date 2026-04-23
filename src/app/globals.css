@@ -3,6 +3,8 @@
 :root {
   --background: #f3f8f4;
   --foreground: #102016;
+  --font-body: "Segoe UI";
+  --font-display: "Trebuchet MS";
   --surface: rgba(255, 255, 255, 0.82);
   --surface-border: rgba(17, 94, 65, 0.16);
   --accent: #0f766e;

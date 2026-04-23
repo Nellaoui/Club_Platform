@@ -42,11 +42,11 @@ export async function setUserGrade(formData: FormData) {
 
   const { data: profile } = await admin
     .from('users')
-    .select('approved')
+    .select('role, approved')
     .eq('id', user.id)
     .maybeSingle()
 
-  if (profile?.approved === false) {
+  if (profile?.role === 'student' && profile.approved !== true) {
     return redirect('/pending-approval')
   }
 

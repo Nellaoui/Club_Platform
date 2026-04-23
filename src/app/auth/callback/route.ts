@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       // Check if user profile exists (use maybeSingle to avoid errors when 0 rows)
       const { data: existingUser } = await admin
         .from('users')
-        .select('id, grade, approved')
+        .select('id, role, grade, approved')
         .eq('id', data.user.id)
         .maybeSingle()
 
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         }
       }
 
-      if (existingUser?.approved === false) {
+      if (existingUser && existingUser.role === 'student' && existingUser.approved !== true) {
         return redirect('/pending-approval')
       }
 

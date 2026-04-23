@@ -9,7 +9,7 @@ export default async function PendingApprovalPage() {
     redirect('/login')
   }
 
-  if (user.approved !== false) {
+  if (user.role !== 'student' || user.approved === true) {
     redirect('/dashboard')
   }
 

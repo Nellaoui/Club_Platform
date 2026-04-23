@@ -114,6 +114,13 @@ export default async function AdminPage() {
             <h3 className="font-bold text-emerald-950">Activity Gallery</h3>
             <p className="text-sm text-emerald-900/75 mt-1">Post and manage club activity images</p>
           </Link>
+          <Link
+            href="/dashboard/admin/projects"
+            className="glass-card block p-4 rounded-xl hover:border-emerald-300 transition-all"
+          >
+            <h3 className="font-bold text-emerald-950">Student Projects</h3>
+            <p className="text-sm text-emerald-900/75 mt-1">Create projects and assign them to students</p>
+          </Link>
         </div>
 
         {/* Recent Users */}

@@ -5,6 +5,18 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { deleteActivityImageAction } from '@/app/actions/gallery'
 import ActivityGalleryForm from './ActivityGalleryForm'
 
+interface RawActivityImageRow {
+  id: string
+  title: string
+  description: string | null
+  image_url: string
+  event_date: string | null
+  created_at: string
+  user: Array<{
+    full_name: string | null
+  }> | null
+}
+
 interface ActivityImageRow {
   id: string
   title: string
@@ -12,9 +24,7 @@ interface ActivityImageRow {
   image_url: string
   event_date: string | null
   created_at: string
-  user: {
-    full_name: string | null
-  } | null
+  postedByName: string | null
 }
 
 export default async function AdminGalleryPage() {
@@ -30,7 +40,15 @@ export default async function AdminGalleryPage() {
     .select('id, title, description, image_url, event_date, created_at, user:users(full_name)')
     .order('created_at', { ascending: false })
 
-  const images = (data || []) as ActivityImageRow[]
+  const images: ActivityImageRow[] = ((data || []) as RawActivityImageRow[]).map((row) => ({
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    image_url: row.image_url,
+    event_date: row.event_date,
+    created_at: row.created_at,
+    postedByName: row.user?.[0]?.full_name ?? null,
+  }))
 
   return (
     <div className="p-4 sm:p-6">
@@ -62,7 +80,7 @@ export default async function AdminGalleryPage() {
                     <h3 className="font-semibold text-gray-900 line-clamp-2">{image.title}</h3>
                     {image.description && <p className="text-sm text-gray-600 mt-2 line-clamp-3">{image.description}</p>}
                     <div className="mt-3 text-xs text-gray-500 space-y-1">
-                      <p>Posted by: {image.user?.full_name || 'Admin'}</p>
+                      <p>Posted by: {image.postedByName || 'Admin'}</p>
                       <p>
                         {image.event_date
                           ? `Activity date: ${new Date(image.event_date).toLocaleDateString()}`
