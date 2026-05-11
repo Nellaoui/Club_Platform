@@ -20,12 +20,24 @@ export default async function GalleryPage() {
   }
 
   const supabase = await createServerSupabaseClient()
-  const { data } = await supabase
-    .from('activity_images')
-    .select('id, title, description, image_url, event_date, created_at')
-    .order('created_at', { ascending: false })
+  let images: ActivityImageRow[] = []
+  let galleryError: string | null = null
 
-  const images = (data || []) as ActivityImageRow[]
+  try {
+    const { data, error } = await supabase
+      .from('activity_images')
+      .select('id, title, description, image_url, event_date, created_at')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      throw error
+    }
+
+    images = (data || []) as ActivityImageRow[]
+  } catch (err) {
+    console.error('Failed to load gallery images:', err)
+    galleryError = 'Gallery images are not available yet. Ask an admin to apply the activity gallery migration.'
+  }
 
   return (
     <div className="p-4 sm:p-6 page-enter">
@@ -37,6 +49,12 @@ export default async function GalleryPage() {
           <h1 className="text-3xl sm:text-4xl font-black text-emerald-950">Club Activity Gallery</h1>
           <p className="text-emerald-900/75 mt-2">Photos from club activities and learning moments.</p>
         </div>
+
+        {galleryError && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            {galleryError}
+          </div>
+        )}
 
         {images.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">

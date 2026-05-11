@@ -14,11 +14,29 @@ export default function ActivityGalleryForm() {
   const [description, setDescription] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [imageUrl, setImageUrl] = useState('')
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
+
+  const uploadSingleImage = async (supabase: ReturnType<typeof createClient>, file: File) => {
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+    const filePath = `gallery/${crypto.randomUUID()}-${safeName}`
+
+    const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file, {
+      contentType: file.type || 'application/octet-stream',
+      upsert: false,
+    })
+
+    if (uploadError) {
+      throw new Error(uploadError.message)
+    }
+
+    const { data: publicUrlData } = supabase.storage.from('images').getPublicUrl(filePath)
+    await createActivityImageAction(title, publicUrlData.publicUrl, description, eventDate)
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
+    const form = event.currentTarget
 
     startTransition(async () => {
       try {
@@ -26,39 +44,32 @@ export default function ActivityGalleryForm() {
           throw new Error('Title is required')
         }
 
-        let uploadedImageUrl = imageUrl.trim() || ''
+        const trimmedImageUrl = imageUrl.trim()
+        const selectedFiles = files.filter((file) => file.size > 0)
 
-        if (file && file.size > 0) {
-          const supabase = createClient()
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-          const filePath = `gallery/${Date.now()}-${safeName}`
-
-          const { error: uploadError } = await supabase.storage
-            .from('images')
-            .upload(filePath, file, {
-              contentType: file.type || 'application/octet-stream',
-              upsert: false,
-            })
-
-          if (uploadError) {
-            throw uploadError
+        if (selectedFiles.length > 0) {
+          if (trimmedImageUrl) {
+            throw new Error('Use either uploaded files or an image URL, not both')
           }
 
-          const { data: publicUrlData } = supabase.storage.from('images').getPublicUrl(filePath)
-          uploadedImageUrl = publicUrlData.publicUrl
-        }
+          const supabase = createClient()
+          for (const file of selectedFiles) {
+            await uploadSingleImage(supabase, file)
+          }
+        } else {
+          if (!trimmedImageUrl) {
+            throw new Error('Please upload at least one image file or provide an image URL')
+          }
 
-        if (!uploadedImageUrl) {
-          throw new Error('Please upload an image file or provide an image URL')
+          await createActivityImageAction(title, trimmedImageUrl, description, eventDate)
         }
-
-        await createActivityImageAction(title, uploadedImageUrl, description, eventDate)
 
         setTitle('')
         setDescription('')
         setEventDate('')
         setImageUrl('')
-        setFile(null)
+        setFiles([])
+        form.reset()
         router.refresh()
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create gallery image'
@@ -101,9 +112,11 @@ export default function ActivityGalleryForm() {
         <input
           type="file"
           accept="image/*"
-          onChange={(event) => setFile(event.target.files?.[0] || null)}
+          multiple
+          onChange={(event) => setFiles(Array.from(event.target.files || []))}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
         />
+        {files.length > 0 && <p className="mt-1 text-xs text-gray-500">{files.length} file(s) selected</p>}
       </div>
 
       <div>

@@ -5,18 +5,6 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { deleteActivityImageAction } from '@/app/actions/gallery'
 import ActivityGalleryForm from './ActivityGalleryForm'
 
-interface RawActivityImageRow {
-  id: string
-  title: string
-  description: string | null
-  image_url: string
-  event_date: string | null
-  created_at: string
-  user: Array<{
-    full_name: string | null
-  }> | null
-}
-
 interface ActivityImageRow {
   id: string
   title: string
@@ -24,7 +12,6 @@ interface ActivityImageRow {
   image_url: string
   event_date: string | null
   created_at: string
-  postedByName: string | null
 }
 
 export default async function AdminGalleryPage() {
@@ -35,20 +22,24 @@ export default async function AdminGalleryPage() {
   }
 
   const supabase = await createServerSupabaseClient()
-  const { data } = await supabase
-    .from('activity_images')
-    .select('id, title, description, image_url, event_date, created_at, user:users(full_name)')
-    .order('created_at', { ascending: false })
+  let images: ActivityImageRow[] = []
+  let galleryError: string | null = null
 
-  const images: ActivityImageRow[] = ((data || []) as RawActivityImageRow[]).map((row) => ({
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    image_url: row.image_url,
-    event_date: row.event_date,
-    created_at: row.created_at,
-    postedByName: row.user?.[0]?.full_name ?? null,
-  }))
+  try {
+    const { data, error } = await supabase
+      .from('activity_images')
+      .select('id, title, description, image_url, event_date, created_at')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      throw error
+    }
+
+    images = (data || []) as ActivityImageRow[]
+  } catch (err) {
+    console.error('Failed to load admin activity gallery:', err)
+    galleryError = 'Gallery images are not available yet. Run the activity gallery migration in Supabase.'
+  }
 
   return (
     <div className="p-4 sm:p-6">
@@ -69,6 +60,12 @@ export default async function AdminGalleryPage() {
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-4">Published Images</h2>
 
+          {galleryError && (
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+              {galleryError}
+            </div>
+          )}
+
           {images.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {images.map((image) => (
@@ -80,7 +77,6 @@ export default async function AdminGalleryPage() {
                     <h3 className="font-semibold text-gray-900 line-clamp-2">{image.title}</h3>
                     {image.description && <p className="text-sm text-gray-600 mt-2 line-clamp-3">{image.description}</p>}
                     <div className="mt-3 text-xs text-gray-500 space-y-1">
-                      <p>Posted by: {image.postedByName || 'Admin'}</p>
                       <p>
                         {image.event_date
                           ? `Activity date: ${new Date(image.event_date).toLocaleDateString()}`
@@ -103,7 +99,9 @@ export default async function AdminGalleryPage() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 py-10 text-center">No activity images posted yet</p>
+            <p className="text-gray-500 py-10 text-center">
+              {galleryError ? 'The gallery table needs to be created before images can be shown.' : 'No activity images posted yet'}
+            </p>
           )}
         </div>
       </div>

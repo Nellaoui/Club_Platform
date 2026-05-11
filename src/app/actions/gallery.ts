@@ -55,7 +55,7 @@ export async function createActivityImageAction(
   })
 
   if (error) {
-    throw error
+    throw new Error(error.message)
   }
 
   revalidatePath('/dashboard/gallery')
