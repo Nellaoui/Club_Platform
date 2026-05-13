@@ -36,7 +36,11 @@ export default function ActivityGalleryForm() {
           formData.append('imageFiles', file)
         }
 
-        await createActivityImagesAction(formData)
+        const result = await createActivityImagesAction(formData)
+
+        if (!result.ok) {
+          throw new Error(result.error)
+        }
 
         setTitle('')
         setDescription('')

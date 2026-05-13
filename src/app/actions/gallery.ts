@@ -103,44 +103,53 @@ export async function createActivityImagesAction(formData: FormData) {
     .filter((value): value is File => value instanceof File && value.size > 0)
 
   if (!title.trim()) {
-    throw new Error('Title is required')
+    return { ok: false, error: 'Title is required' }
   }
 
   if (imageFiles.length > 0 && imageUrl) {
-    throw new Error('Use either uploaded files or an image URL, not both')
+    return { ok: false, error: 'Use either uploaded files or an image URL, not both' }
   }
 
   if (imageFiles.length === 0 && !imageUrl) {
-    throw new Error('Please upload at least one image file or provide an image URL')
+    return { ok: false, error: 'Please upload at least one image file or provide an image URL' }
   }
 
-  if (imageFiles.length > 0) {
-    for (const file of imageFiles) {
-      const { supabase, publicUrl } = await uploadActivityImageFile(file)
-      const { data: { user } } = await supabase.auth.getUser()
+  try {
+    if (imageFiles.length > 0) {
+      for (const file of imageFiles) {
+        const { supabase, publicUrl } = await uploadActivityImageFile(file)
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
-      if (!user) {
-        redirect('/login')
+        if (!user) {
+          redirect('/login')
+        }
+
+        const { error } = await supabase.from('activity_images').insert({
+          title: title.trim(),
+          image_url: publicUrl,
+          description: description.trim() || null,
+          event_date: eventDate || null,
+          created_by: user.id,
+        })
+
+        if (error) {
+          return { ok: false, error: error.message }
+        }
       }
-
-      const { error } = await supabase.from('activity_images').insert({
-        title: title.trim(),
-        image_url: publicUrl,
-        description: description.trim() || null,
-        event_date: eventDate || null,
-        created_by: user.id,
-      })
-
-      if (error) {
-        throw new Error(error.message)
-      }
+    } else {
+      await upsertActivityImage(title, imageUrl, description, eventDate)
     }
-  } else {
-    await upsertActivityImage(title, imageUrl, description, eventDate)
-  }
 
-  revalidatePath('/dashboard/gallery')
-  revalidatePath('/dashboard/admin/gallery')
+    revalidatePath('/dashboard/gallery')
+    revalidatePath('/dashboard/admin/gallery')
+
+    return { ok: true }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to post activity images'
+    return { ok: false, error: message }
+  }
 }
 
 export async function deleteActivityImageAction(id: string) {
