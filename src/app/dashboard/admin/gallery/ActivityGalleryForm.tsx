@@ -2,8 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
-import { createActivityImageAction } from '@/app/actions/gallery'
+import { createActivityImagesAction } from '@/app/actions/gallery'
 
 export default function ActivityGalleryForm() {
   const router = useRouter()
@@ -16,23 +15,6 @@ export default function ActivityGalleryForm() {
   const [imageUrl, setImageUrl] = useState('')
   const [files, setFiles] = useState<File[]>([])
 
-  const uploadSingleImage = async (supabase: ReturnType<typeof createClient>, file: File) => {
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const filePath = `gallery/${crypto.randomUUID()}-${safeName}`
-
-    const { error: uploadError } = await supabase.storage.from('images').upload(filePath, file, {
-      contentType: file.type || 'application/octet-stream',
-      upsert: false,
-    })
-
-    if (uploadError) {
-      throw new Error(uploadError.message)
-    }
-
-    const { data: publicUrlData } = supabase.storage.from('images').getPublicUrl(filePath)
-    await createActivityImageAction(title, publicUrlData.publicUrl, description, eventDate)
-  }
-
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
@@ -44,25 +26,17 @@ export default function ActivityGalleryForm() {
           throw new Error('Title is required')
         }
 
-        const trimmedImageUrl = imageUrl.trim()
-        const selectedFiles = files.filter((file) => file.size > 0)
+        const formData = new FormData()
+        formData.set('title', title.trim())
+        formData.set('description', description)
+        formData.set('eventDate', eventDate)
+        formData.set('imageUrl', imageUrl.trim())
 
-        if (selectedFiles.length > 0) {
-          if (trimmedImageUrl) {
-            throw new Error('Use either uploaded files or an image URL, not both')
-          }
-
-          const supabase = createClient()
-          for (const file of selectedFiles) {
-            await uploadSingleImage(supabase, file)
-          }
-        } else {
-          if (!trimmedImageUrl) {
-            throw new Error('Please upload at least one image file or provide an image URL')
-          }
-
-          await createActivityImageAction(title, trimmedImageUrl, description, eventDate)
+        for (const file of files.filter((file) => file.size > 0)) {
+          formData.append('imageFiles', file)
         }
+
+        await createActivityImagesAction(formData)
 
         setTitle('')
         setDescription('')
